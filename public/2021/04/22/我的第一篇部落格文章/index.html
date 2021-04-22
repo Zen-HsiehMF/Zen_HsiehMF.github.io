@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>我的第一篇部落格文章 | 微風飛翔</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Docker 網路模式介紹與實作Docker 網路模式可以幫助我們對容器做有效的網路區隔，因此了解容器中各種網路模式的設置對於安全性非常重要的影響。 在這之中，Docker 網路能分為 single-host 與 multi-host 兩種類型。簡單來說，single-host 就是在單一台主機上管理多個容器之間的網路。而本篇主要專注於 single-host 的四種網路模式：none、bridg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我的第一篇部落格文章">
+<meta property="og:url" content="https://github.com/Zen-HsiehMF.github.io/2021/04/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E9%83%A8%E8%90%BD%E6%A0%BC%E6%96%87%E7%AB%A0/index.html">
+<meta property="og:site_name" content="微風飛翔">
+<meta property="og:description" content="Docker 網路模式介紹與實作Docker 網路模式可以幫助我們對容器做有效的網路區隔，因此了解容器中各種網路模式的設置對於安全性非常重要的影響。 在這之中，Docker 網路能分為 single-host 與 multi-host 兩種類型。簡單來說，single-host 就是在單一台主機上管理多個容器之間的網路。而本篇主要專注於 single-host 的四種網路模式：none、bridg">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/1600/1*D42t6frq1t5OXQV7vlD3Kw.png">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/1600/1*ZLYE-pTv9ezwcxnb3qM6mQ.png">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/2400/1*-s5g2rhePgwca4eEpDhfOw.png">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/2400/1*VwpCP5_V7VwzUsg3ReYRIA.png">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/2400/1*wY94UtNIOJAkM-SvgPU3gA.png">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/2400/1*tx7mBA-D2Br9IH1JYT2UWQ.png">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/2400/1*QSO37HXseDMM943W9OZzig.png">
+<meta property="og:image" content="https://cdn-images-1.medium.com/max/1600/1*-HzV_FXAm7y54rrCotoYpg.png">
+<meta property="article:published_time" content="2021-04-22T15:40:21.000Z">
+<meta property="article:modified_time" content="2021-04-22T15:46:21.791Z">
+<meta property="article:author" content="Mowli微風, 飛翔">
+<meta property="article:tag" content="前端,後端,全端,軟體開發,技術,前端開發,後端開發">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn-images-1.medium.com/max/1600/1*D42t6frq1t5OXQV7vlD3Kw.png">
+  
+    <link rel="alternate" href="/Zen-HsiehMF.github.io/atom.xml" title="微風飛翔" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/Zen-HsiehMF.github.io/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/Zen-HsiehMF.github.io/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/Zen-HsiehMF.github.io/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/Zen-HsiehMF.github.io/" id="logo">微風飛翔</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/Zen-HsiehMF.github.io/">Home</a>
+        
+          <a class="main-nav-link" href="/Zen-HsiehMF.github.io/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/Zen-HsiehMF.github.io/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜尋"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜尋"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://github.com/Zen-HsiehMF.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-我的第一篇部落格文章" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/Zen-HsiehMF.github.io/2021/04/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E9%83%A8%E8%90%BD%E6%A0%BC%E6%96%87%E7%AB%A0/" class="article-date">
+  <time class="dt-published" datetime="2021-04-22T15:40:21.000Z" itemprop="datePublished">2021-04-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      我的第一篇部落格文章
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="Docker-網路模式介紹與實作"><a href="#Docker-網路模式介紹與實作" class="headerlink" title="Docker 網路模式介紹與實作"></a>Docker 網路模式介紹與實作</h3><p>Docker 網路模式可以幫助我們對容器做有效的網路區隔，因此了解容器中各種網路模式的設置對於安全性非常重要的影響。</p>
+<p>在這之中，Docker 網路能分為 single-host 與 multi-host 兩種類型。簡單來說，single-host 就是在單一台主機上管理多個容器之間的網路。而本篇主要專注於 single-host 的四種網路模式：none、bridge、container、host，以及比較其中的差異。</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*D42t6frq1t5OXQV7vlD3Kw.png" alt="img"></p>
+<h4 id="共同指令"><a href="#共同指令" class="headerlink" title="共同指令"></a>共同指令</h4><p><code>docker network ls</code> ：檢視所有的網路<br><code>docker network inspect 網路名稱</code> ：顯示網路的詳細資訊</p>
+<h3 id="一、none-模式"><a href="#一、none-模式" class="headerlink" title="一、none 模式"></a>一、none 模式</h3><p>主要指令：<code>--net=none</code></p>
+<p>容器沒有對外連網的能力，唯一可用的就是自己的 loopback 127.0.0.1，這也代表外部沒有任何東西有辦法連結到該容器。</p>
+<iframe width="700" height="250" src="/media/94f39fb7bfcf370ed6dd998fe752d1b3" data-media-id="94f39fb7bfcf370ed6dd998fe752d1b3" data-thumbnail="https://i.embed.ly/1/image?url=https%3A%2F%2Fgithub.githubassets.com%2Fimages%2Fmodules%2Fgists%2Fgist-og-image.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07" allowfullscreen="" frameborder="0"></iframe>
+
+<p>最後，ping 外網會得到 Network is unreachable 的結果，證實了容器無法與外部接觸，使用 <code>ifconfig</code> 指令可觀察到 none-mode-01 容器確實只有自己的 loopback。</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*ZLYE-pTv9ezwcxnb3qM6mQ.png" alt="img">node-mode-01 容器執行結果</p>
+<h4 id="優缺點及適用場景"><a href="#優缺點及適用場景" class="headerlink" title="優缺點及適用場景"></a>優缺點及適用場景</h4><ol>
+<li>僅有內網，獨立性與安全性最高。</li>
+<li>沒有辦法連結外網，對於需要下載更新的情境就不適用。</li>
+<li>若搭配 container 模式可擴大 none 模式的使用情境。</li>
+</ol>
+<h3 id="二、bridge-模式"><a href="#二、bridge-模式" class="headerlink" title="二、bridge 模式"></a>二、bridge 模式</h3><p>為容器預設的網路模式。連結到同一個 bridge 下的容器們都能互相溝通，而不同 bridge 之間的容器是不能溝通的，除非透過 connect 指令。</p>
+<p>舉一個簡單的情境，當你身處在一間房子 (bridge1)，你理所當然可以與在房子裡的其他人(container)聊天、吃飯、玩 switch … 等等互動。但是，你突然想到另一個重要的朋友(container)，但他正在家裡 (bridge2)，很可惜沒辦法跟他分享當下的喜悅。</p>
+<p>不過，現在手機那麼方便，直接用視訊就好了 (connect)，這樣他就可以享受雖然在家，但也同時跟你們身處在同一個空間裡。</p>
+<p>主要指令：<code>--net=bridge名稱</code> 及 <code>docker network create --driver=bridge 要取的bridge名稱</code></p>
+<h4 id="一-預設-bridge-network"><a href="#一-預設-bridge-network" class="headerlink" title="(一) 預設 bridge network"></a>(一) 預設 bridge network</h4><p>在 docker 中本來就會存在一個預設的 bridge，以下我們直接建立兩個容器來實際操作：</p>
+<iframe width="700" height="250" src="/media/981825af73832d77426abd3c362abca9" data-media-id="981825af73832d77426abd3c362abca9" data-thumbnail="https://i.embed.ly/1/image?url=https%3A%2F%2Fgithub.githubassets.com%2Fimages%2Fmodules%2Fgists%2Fgist-og-image.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07" allowfullscreen="" frameborder="0"></iframe>
+
+<p>然後，使用 <code>docker network inspect bridge</code> 會發現裡面多了剛剛新增的那兩個容器 。試著拿 bridge-mode-01 容器去 ping 看看外網及另外一個容器看結果會怎樣？</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*-s5g2rhePgwca4eEpDhfOw.png" alt="img"></p>
+<p>結果 bridge-mode-01 容器 ping 得通外網及 bridge-mode-02 容器，這證明容器具備了外網及與其他容器進行溝通的能力。</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*VwpCP5_V7VwzUsg3ReYRIA.png" alt="img"></p>
+<p>二、自己客製的 bridge network</p>
+<p>使用 <code>docker network create --driver=bridge &lt;要取的bridge名稱&gt;</code> 來建立自己的 bridge network。以下會建立兩個自己的 bridge network，它們會各別擁有兩個容器：</p>
+<iframe width="700" height="250" src="/media/2ffaa6628ecf3e90068d0996161d6b41" data-media-id="2ffaa6628ecf3e90068d0996161d6b41" data-thumbnail="https://i.embed.ly/1/image?url=https%3A%2F%2Fgithub.githubassets.com%2Fimages%2Fmodules%2Fgists%2Fgist-og-image.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07" allowfullscreen="" frameborder="0"></iframe>
+
+<p>由於資訊太長了，整理成表格呈現：</p>
+<iframe data-width="700" data-height="326" width="700" height="326" src="/media/a1cf23164afa14c41da05c81bce8cf73" data-media-id="a1cf23164afa14c41da05c81bce8cf73" allowfullscreen="" frameborder="0"></iframe>
+
+<p>照著剛剛的規則，容器 1 跟 2 互通，而容器 3 跟 4 互通，但是如果容器 4 想要跟 my-bridge-01 的容器做跨 bridge 間溝通是沒辦法的。</p>
+<h4 id="不同-bridge-之間的溝通"><a href="#不同-bridge-之間的溝通" class="headerlink" title="不同 bridge 之間的溝通"></a>不同 bridge 之間的溝通</h4><p>主要指令：<code>docker network connect &lt;容器要連結到的bridge&gt; &lt;哪個容器&gt;</code></p>
+<iframe width="700" height="250" src="/media/9ce98915ad9a6173f12bfb543f640e4b" data-media-id="9ce98915ad9a6173f12bfb543f640e4b" data-thumbnail="https://i.embed.ly/1/image?url=https%3A%2F%2Fgithub.githubassets.com%2Fimages%2Fmodules%2Fgists%2Fgist-og-image.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07" allowfullscreen="" frameborder="0"></iframe>
+
+<p><strong>竟然 ping 通了，怎麼會這樣子？</strong>其實你自己看 <code>docker network inspect my-bridge-01</code>就知道了。</p>
+<p>當容器 4 被 connect 到 <code>my-bridge-01</code> 時，它得到了位於 <code>my-bridge-01</code> subnet 的新 ip，另外一個是原本在 <code>my-bridge-02</code> subnet 的 ip，因此才能在兩個 bridge 內之間進行溝通。</p>
+<iframe data-width="700" data-height="375" width="700" height="375" src="/media/6694be4356f8f5ee61180eb7ab94a8ae" data-media-id="6694be4356f8f5ee61180eb7ab94a8ae" allowfullscreen="" frameborder="0"></iframe>
+
+<blockquote>
+<p>有在用 docker-compose 應該會知道 link，據 docker 官方的說法是 link 為connect 舊版。總之，他們是一樣的東西。</p>
+</blockquote>
+<h4 id="優缺點及適用場景-1"><a href="#優缺點及適用場景-1" class="headerlink" title="優缺點及適用場景"></a>優缺點及適用場景</h4><ol>
+<li>各個容器能透過 bridge 進行溝通，可以使用外網。</li>
+<li>若其中一個容器受感染的話有可能攻擊其他容器。但也不用擔心，容器有辦法可以關閉被訪問。</li>
+<li>當網路配置的客製化需求大時可使用此模式，例如：DNS 設置、分配容器的 IP 地址範圍、MTU 等設定。</li>
+</ol>
+<h3 id="三、container-模式"><a href="#三、container-模式" class="headerlink" title="三、container 模式"></a>三、container 模式</h3><p>此種模式可以指定一個容器去「共享」另外一個容器的網路設定。舉例來說，容器 B 指定使用 none 模式的容器 A，那麼容器 B 就會是 none 模式。</p>
+<p>主要指令：<code>--net=container:&lt;你要複製的container&gt; --name &lt;新container&gt;</code></p>
+<iframe width="700" height="250" src="/media/23ba85646242c95f6ec42da309b220a9" data-media-id="23ba85646242c95f6ec42da309b220a9" data-thumbnail="https://i.embed.ly/1/image?url=https%3A%2F%2Fgithub.githubassets.com%2Fimages%2Fmodules%2Fgists%2Fgist-og-image.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07" allowfullscreen="" frameborder="0"></iframe>
+
+<p>執行結果為 container-mode-01 容器其網路設定確實與 container-04 完全相同。</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*wY94UtNIOJAkM-SvgPU3gA.png" alt="img">container-mode-01 容器之網路設定</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*tx7mBA-D2Br9IH1JYT2UWQ.png" alt="img">container-04 容器之網路設定</p>
+<p>因此，它也跟 container-04 一樣能 ping 得通不同 bridge-01 跟 02 內的容器哦～反正就是連體雙胞胎的概念啦！</p>
+<h4 id="優缺點及適用場景-2"><a href="#優缺點及適用場景-2" class="headerlink" title="優缺點及適用場景"></a>優缺點及適用場景</h4><ol>
+<li>兩個容器的接口(interface)共享，所以可能發生衝突問題。</li>
+<li>bridge 網路模式的情況會受到防火牆規則的限制，但是 container 模式由於共享的關係，就算關閉防火牆，容器之間一樣可以進行溝通，甚至兩個 none 模式容器也可以。</li>
+<li>可以拿來一個容器來監控另一個容器的網路流量[1]。</li>
+</ol>
+<h3 id="四、host-模式"><a href="#四、host-模式" class="headerlink" title="四、host 模式"></a>四、host 模式</h3><p>host 模式的容器會直接共用虛擬主機的網路設定。</p>
+<p>主要指令：<code>--net=host:&lt;你要複製的container&gt; --name &lt;建立的container&gt;</code></p>
+<iframe width="700" height="250" src="/media/2477c201f289a0e9c0f64999cb7b9806" data-media-id="2477c201f289a0e9c0f64999cb7b9806" data-thumbnail="https://i.embed.ly/1/image?url=https%3A%2F%2Fgithub.githubassets.com%2Fimages%2Fmodules%2Fgists%2Fgist-og-image.png&amp;key=a19fcc184b9711e1b4764040d3dc5c07" allowfullscreen="" frameborder="0"></iframe>
+
+<blockquote>
+<p>hmf/nodejs-web 該 image 是一個顯示 「Hello, Nodejs and Docker」 文字的網頁，端口開在 3000，因此只要連到虛擬主機 ip 的 3000 port 就可以看到這段文字。</p>
+</blockquote>
+<h4 id="優缺點及適用場景-3"><a href="#優缺點及適用場景-3" class="headerlink" title="優缺點及適用場景"></a>優缺點及適用場景</h4><ol>
+<li>可以完全訪問主機的網路，獨立性及安全性最低。</li>
+<li>除非沒有其它選擇，否則不建議使用。</li>
+</ol>
+<p>最後，我們用書籍整理的架構圖來複習一下四種網路模式吧！而第二張圖是補充 bridge 模式的概念圖，容器會透過 container virtual interface 與其他容器溝通。</p>
+<p><img src="https://cdn-images-1.medium.com/max/2400/1*QSO37HXseDMM943W9OZzig.png" alt="img">Docker Network 整體架構圖</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*-HzV_FXAm7y54rrCotoYpg.png" alt="img">補充：Docker Network Bridge 模式之概念圖</p>
+<h3 id="總結"><a href="#總結" class="headerlink" title="總結"></a>總結</h3><p>single-host 的四種網路模式讓我們知道如何規劃與區隔容器之間的溝通，撰寫一次啟動多個容器 docker-compose 時也可以比較清楚 bridge 的部分在做些什麼事。</p>
+<h3 id="參考資料"><a href="#參考資料" class="headerlink" title="參考資料"></a>參考資料</h3><ol>
+<li>Nickoloff, J. (2016). <em>Docker in action</em>. Manning Publications Co.</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/Zen-HsiehMF.github.io/2021/04/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E9%83%A8%E8%90%BD%E6%A0%BC%E6%96%87%E7%AB%A0/" data-id="cknt221g10000s2bz9ajh6rwd" data-title="我的第一篇部落格文章" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/Zen-HsiehMF.github.io/2021/04/22/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">彙整</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/Zen-HsiehMF.github.io/archives/2021/04/">四月 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/Zen-HsiehMF.github.io/2021/04/22/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E9%83%A8%E8%90%BD%E6%A0%BC%E6%96%87%E7%AB%A0/">我的第一篇部落格文章</a>
+          </li>
+        
+          <li>
+            <a href="/Zen-HsiehMF.github.io/2021/04/22/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 Mowli微風, 飛翔<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/Zen-HsiehMF.github.io/" class="mobile-nav-link">Home</a>
+  
+    <a href="/Zen-HsiehMF.github.io/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/Zen-HsiehMF.github.io/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/Zen-HsiehMF.github.io/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/Zen-HsiehMF.github.io/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
